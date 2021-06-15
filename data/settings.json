@@ -1,0 +1,27 @@
+{
+  "$schema": "./settings.schema.json",
+  "application": {},
+  "cookie": {
+    "age": 604800000,
+    "secret": "jjwak"
+  },
+  "database": {
+    "username": "root",
+    "database": "neisschool",
+    "host": "localhost",
+    "password": "1234",
+    "port": 3306
+  },
+  "neis": {
+    "host": "https://open.neis.go.kr/hub",
+    "key": "84b026a03cc8424491c0a04083c3c94a"
+  },
+  "language-support": {
+    "ko-KR": "한국어"
+  },
+  "log": {
+    "directory": "logs",
+    "interval": 86400000
+  },
+  "port": 4416
+}
