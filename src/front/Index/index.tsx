@@ -4,9 +4,9 @@ import Axios from "axios";
 import JJorm from "../JJorm";
 import Bind from "../ReactBootstrap";
 import L from "../@global/Language";
-import { NONAME } from "dns";
 
 type SchoolData = {
+  SD_SCHUL_CODE: string;
   ATPT_OFCDC_SC_NM: string;
   SCHUL_NM: string;
   ENG_SCHUL_NM: string;
@@ -23,7 +23,13 @@ type SchoolData = {
 type Properties = {};
 type State = {
   schoolData: SchoolData;
-  duplicatedName: Array<any>;
+  duplicatedName: Array<SchoolData>;
+  comment: Array<
+    React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLSpanElement>,
+      HTMLSpanElement
+    >
+  >;
 };
 
 export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
@@ -31,6 +37,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
     super(props);
     this.state = {
       schoolData: {
+        SD_SCHUL_CODE: "",
         ATPT_OFCDC_SC_NM: "",
         SCHUL_NM: "",
         ENG_SCHUL_NM: "",
@@ -45,6 +52,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         FOND_YMD: 0,
       },
       duplicatedName: [],
+      comment: [<span>학교 평가를 작성하려면 먼저 학교를 검색해주세요.</span>],
     };
   }
 
@@ -67,6 +75,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
             onClick={(e) => {
               this.setState({ schoolData: this.state.duplicatedName[i] });
               this.hide(e.currentTarget.parentElement);
+              this.loadComments(this.state.duplicatedName[i]);
             }}
           >
             {this.state.duplicatedName[i].SCHUL_NM} (
@@ -75,9 +84,43 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         </>
       );
     }
-    console.log(arr);
     return arr;
   }
+
+  loadComments = async (custom?: SchoolData) => {
+    const arr: Array<
+      React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLSpanElement>,
+        HTMLSpanElement
+      >
+    > = [];
+
+    this.setState({ comment: [] });
+    await Axios.get(
+      `/school/comment?id=${
+        custom ? custom.SD_SCHUL_CODE : this.state.schoolData.SD_SCHUL_CODE
+      }`
+    ).then(
+      ({ data }) => {
+        if (!data.length) return <span>DB에 존재하지 않는 학교입니다.</span>;
+
+        for (let i in data) {
+          if (data[i].status.deleted) continue;
+          if (data[i].target !== this.state.schoolData.SD_SCHUL_CODE) continue;
+          arr.push(<br />);
+          arr.push(
+            <span id={`comment${data[i].id}`}>
+              [{data[i].createdAt}] {data[i].writer}: {data[i].content}
+            </span>
+          );
+        }
+        this.setState({ comment: arr });
+      },
+      (e) => {
+        console.error(e);
+      }
+    );
+  };
 
   render(): React.ReactNode {
     return (
@@ -107,6 +150,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
                   schoolData: res[0],
                 });
                 this.hide(document.getElementById("selectSchoolDialogBox"));
+                this.loadComments();
               }
             }}
           >
@@ -164,6 +208,48 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
             하나를 선택해주세요.
           </span>
           {this.handleDuplicatedName()}
+        </div>
+        <div
+          id="commentBox"
+          style={{
+            display: this.state.schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
+          }}
+        >
+          <h3>학교 평가</h3>
+          {this.state.comment}
+          <p />
+          <input id="writerNameInput" placeholder="작성자" />
+          <input id="writerPasswordInput" placeholder="비밀번호" />
+          <br />
+          <textarea id="commentInput" placeholder="내용" />
+          <button
+            onClick={async () => {
+              const writer = (
+                document.getElementById("writerNameInput") as HTMLInputElement
+              ).value;
+              const password = (
+                document.getElementById(
+                  "writerPasswordInput"
+                ) as HTMLInputElement
+              ).value;
+              const content = (
+                document.getElementById("commentInput") as HTMLTextAreaElement
+              ).value;
+              if (!writer) return alert("작성자 닉네임을 입력해주세요.");
+              if (!password)
+                return alert("댓글 관리를 위한 비밀번호를 입력해주세요.");
+              if (!content) return alert("내용을 입력해주세요.");
+              await Axios.post("/school/comment", {
+                writer: writer,
+                target: this.state.schoolData.SD_SCHUL_CODE,
+                content: content,
+                password: password,
+              });
+              this.loadComments();
+            }}
+          >
+            작성
+          </button>
         </div>
       </article>
     );

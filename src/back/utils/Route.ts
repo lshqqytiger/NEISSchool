@@ -1,5 +1,6 @@
 import Express from "express";
-import Axios, { AxiosAdapter } from "axios";
+import Axios from "axios";
+import SHA256 from "sha256";
 
 import { SETTINGS } from "./System";
 import { loadLanguages } from "./Language";
@@ -101,6 +102,31 @@ export default function (App: Express.Application): void {
       registerSchoolToDB(schoolData[0], req, res);
       return res.send([schoolData[0]]);
     }
+  });
+  App.get("/school/comment", async (req, res) => {
+    if (!req.query.id) return res.sendStatus(400);
+
+    const comments = await DB.Manager.query(
+      `SELECT * FROM comment WHERE target = '${req.query.id}'`
+    );
+
+    return res.send(comments);
+  });
+  App.post("/school/comment", async (req, res) => {
+    if (!req.body.writer) return res.sendStatus(400);
+    if (!req.body.password) return res.sendStatus(400);
+    if (!req.body.target) return res.sendStatus(400);
+    if (!req.body.content) return res.sendStatus(400);
+
+    await DB.Manager.query(
+      `INSERT INTO comment(writer, target, content, password, ip) VALUES('${
+        req.body.writer
+      }', '${req.body.target}', '${req.body.content}', '${SHA256.x2(
+        req.body.password
+      )}', '${req.ip}')`
+    );
+
+    return res.sendStatus(200);
   });
   App.get("/admin/load-languages", (req, res) => {
     loadLanguages();
