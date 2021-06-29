@@ -8,6 +8,7 @@ import L from "../@global/Language";
 type SchoolData = {
   SD_SCHUL_CODE: string;
   ATPT_OFCDC_SC_NM: string;
+  ATPT_OFCDC_SC_CODE: string;
   SCHUL_NM: string;
   ENG_SCHUL_NM: string;
   SCHUL_KND_SC_NM: string;
@@ -30,6 +31,9 @@ type State = {
       HTMLSpanElement
     >
   >;
+  today: any;
+  schedule: any;
+  meal: Array<any>;
 };
 
 export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
@@ -39,6 +43,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
       schoolData: {
         SD_SCHUL_CODE: "",
         ATPT_OFCDC_SC_NM: "",
+        ATPT_OFCDC_SC_CODE: "",
         SCHUL_NM: "",
         ENG_SCHUL_NM: "",
         SCHUL_KND_SC_NM: "",
@@ -53,6 +58,11 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
       },
       duplicatedName: [],
       comment: [<span>학교 평가를 작성하려면 먼저 학교를 검색해주세요.</span>],
+      today: new Date(),
+      schedule: (
+        <span>학사일정 정보를 확인하려면 먼저 학교를 검색해주세요.</span>
+      ),
+      meal: [<span>급식 정보를 확인하려면 먼저 학교를 검색해주세요.</span>],
     };
   }
 
@@ -76,6 +86,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
               this.setState({ schoolData: this.state.duplicatedName[i] });
               this.hide(e.currentTarget.parentElement);
               this.loadComments(this.state.duplicatedName[i]);
+              this.getSchedule(this.state.duplicatedName[i]);
             }}
           >
             {this.state.duplicatedName[i].SCHUL_NM} (
@@ -102,7 +113,12 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
       }`
     ).then(
       ({ data }) => {
-        if (!data.length) return <span>DB에 존재하지 않는 학교입니다.</span>;
+        if (!data.length) {
+          this.setState({
+            comment: [<span>DB에 존재하지 않는 학교입니다.</span>],
+          });
+          return;
+        }
 
         for (let i in data) {
           if (data[i].status.deleted) continue;
@@ -115,6 +131,107 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
           );
         }
         this.setState({ comment: arr });
+      },
+      (e) => {
+        console.error(e);
+      }
+    );
+  };
+
+  getSchedule = async (
+    custom?: SchoolData,
+    AA_FROM_YMD?: string,
+    AA_TO_YMD?: string
+  ) => {
+    const arr: Array<
+      React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLSpanElement>,
+        HTMLSpanElement
+      >
+    > = [];
+    const now = new Date();
+
+    this.setState({
+      schedule: (
+        <span>학사일정 정보를 확인하려면 먼저 학교를 검색해주세요.</span>
+      ),
+    });
+    await Axios.get("/school/schedule", {
+      params: {
+        ATPT_OFCDC_SC_CODE: custom
+          ? custom.ATPT_OFCDC_SC_CODE
+          : this.state.schoolData.ATPT_OFCDC_SC_CODE,
+        SD_SCHUL_CODE: custom
+          ? custom.SD_SCHUL_CODE
+          : this.state.schoolData.SD_SCHUL_CODE,
+        AA_FROM_YMD:
+          AA_FROM_YMD ||
+          `${this.state.today.getFullYear()}${String(
+            this.state.today.getMonth()
+          ).padStart(2, "0")}01`,
+        AA_TO_YMD:
+          AA_TO_YMD ||
+          `${this.state.today.getFullYear()}${String(
+            this.state.today.getMonth()
+          ).padStart(2, "0")}31`,
+      },
+    }).then(
+      ({ data }) => {
+        if (!data.length)
+          return (
+            <span>
+              API에서 가져올 수 없는 학교 또는 존재하지 않는 학교입니다.
+            </span>
+          );
+
+        const firstDay = AA_FROM_YMD
+          ? new Date(
+              Number(AA_FROM_YMD.slice(0, 4)),
+              Number(AA_FROM_YMD.slice(4, 6)),
+              Number(AA_FROM_YMD.slice(6, 8))
+            )
+          : new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = AA_TO_YMD
+          ? new Date(
+              Number(AA_TO_YMD.slice(0, 4)),
+              Number(AA_TO_YMD.slice(4, 6)),
+              Number(AA_TO_YMD.slice(6, 8))
+            )
+          : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const scheduleTable = document.getElementById(
+          "scheduleTable"
+        ) as HTMLTableElement;
+
+        while (scheduleTable.rows.length > 2) {
+          scheduleTable.deleteRow(scheduleTable.rows.length - 1);
+        }
+
+        let row = scheduleTable.insertRow();
+        let cell,
+          cnt = 0;
+
+        for (let i = 0; i < firstDay.getDay(); i++) {
+          cell = row.insertCell();
+          cnt = cnt + 1;
+        }
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+          cell = row.insertCell();
+          cell.innerHTML = String(i);
+          cnt = cnt + 1;
+          if (cnt % 7 === 1) {
+            cell.innerHTML = "<font color=red>" + i;
+          }
+          if (cnt % 7 === 0) {
+            cell.innerHTML = "<font color=blue>" + i;
+            row = scheduleTable.insertRow();
+          }
+          if (
+            now.getFullYear() === this.state.today.getFullYear() &&
+            now.getMonth() === this.state.today.getMonth() &&
+            i == now.getDate()
+          )
+            cell.classList.add("today");
+        }
       },
       (e) => {
         console.error(e);
@@ -151,6 +268,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
                 });
                 this.hide(document.getElementById("selectSchoolDialogBox"));
                 this.loadComments();
+                this.getSchedule();
               }
             }}
           >
@@ -250,6 +368,50 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
           >
             작성
           </button>
+        </div>
+        <p />
+        <div
+          id="scheduleBox"
+          style={{
+            display: this.state.schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
+          }}
+        >
+          <h3 id="scheduleTitle">
+            {this.state.today.getMonth() + 1}월 학사일정
+          </h3>
+          <table id="scheduleTable">
+            <tr>
+              <td>
+                <label onClick={() => {}}>{"<"}</label>
+              </td>
+              <td id="yearMonth" align="center" colSpan={5}></td>
+              <td>
+                <label onClick={() => {}}>{">"}</label>
+              </td>
+            </tr>
+            <tr>
+              <td align="center">
+                <span color="red">일</span>
+              </td>
+              <td align="center">월</td>
+              <td align="center">화</td>
+              <td align="center">수</td>
+              <td align="center">목</td>
+              <td align="center">금</td>
+              <td align="center">
+                <span color="blue">토</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <p />
+        <div
+          id="mealBox"
+          style={{
+            display: this.state.schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
+          }}
+        >
+          <h3>급식</h3>
         </div>
       </article>
     );

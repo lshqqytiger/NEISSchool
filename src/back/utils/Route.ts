@@ -112,6 +112,28 @@ export default function (App: Express.Application): void {
 
     return res.send(comments);
   });
+  App.get("/school/schedule", async (req, res) => {
+    if (!req.query.ATPT_OFCDC_SC_CODE) return res.sendStatus(400);
+    if (!req.query.SD_SCHUL_CODE) return res.sendStatus(400);
+
+    const schedule = (
+      await Axios.get(`${SETTINGS["neis"].host}/SchoolSchedule`, {
+        params: {
+          KEY: SETTINGS["neis"].key,
+          Type: "json",
+          pIndex: 1,
+          pSize: 27,
+          ATPT_OFCDC_SC_CODE: req.query.ATPT_OFCDC_SC_CODE,
+          SD_SCHUL_CODE: req.query.SD_SCHUL_CODE,
+          AA_FROM_YMD: req.query.AA_FROM_YMD,
+          AA_TO_YMD: req.query.AA_TO_YMD,
+        },
+      })
+    ).data;
+
+    return res.send(schedule.SchoolSchedule[1].row);
+  });
+
   App.post("/school/comment", async (req, res) => {
     if (!req.body.writer) return res.sendStatus(400);
     if (!req.body.password) return res.sendStatus(400);
@@ -128,6 +150,7 @@ export default function (App: Express.Application): void {
 
     return res.sendStatus(200);
   });
+
   App.get("/admin/load-languages", (req, res) => {
     loadLanguages();
     return res.sendStatus(200);
