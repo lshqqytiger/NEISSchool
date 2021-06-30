@@ -1,5 +1,6 @@
 import React from "react";
 import Axios from "axios";
+import { Scheduler, MonthView } from "@progress/kendo-react-scheduler";
 
 import JJorm from "../JJorm";
 import Bind from "../ReactBootstrap";
@@ -59,9 +60,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
       duplicatedName: [],
       comment: [<span>학교 평가를 작성하려면 먼저 학교를 검색해주세요.</span>],
       today: new Date(),
-      schedule: (
-        <span>학사일정 정보를 확인하려면 먼저 학교를 검색해주세요.</span>
-      ),
+      schedule: [],
       meal: [<span>급식 정보를 확인하려면 먼저 학교를 검색해주세요.</span>],
     };
   }
@@ -86,7 +85,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
               this.setState({ schoolData: this.state.duplicatedName[i] });
               this.hide(e.currentTarget.parentElement);
               this.loadComments(this.state.duplicatedName[i]);
-              this.getSchedule(this.state.duplicatedName[i]);
+              this.loadSchedule(this.state.duplicatedName[i]);
             }}
           >
             {this.state.duplicatedName[i].SCHUL_NM} (
@@ -138,7 +137,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
     );
   };
 
-  getSchedule = async (
+  loadSchedule = async (
     custom?: SchoolData,
     AA_FROM_YMD?: string,
     AA_TO_YMD?: string
@@ -149,12 +148,9 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         HTMLSpanElement
       >
     > = [];
-    const now = new Date();
 
     this.setState({
-      schedule: (
-        <span>학사일정 정보를 확인하려면 먼저 학교를 검색해주세요.</span>
-      ),
+      schedule: [],
     });
     await Axios.get("/school/schedule", {
       params: {
@@ -164,19 +160,13 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         SD_SCHUL_CODE: custom
           ? custom.SD_SCHUL_CODE
           : this.state.schoolData.SD_SCHUL_CODE,
-        AA_FROM_YMD:
-          AA_FROM_YMD ||
-          `${this.state.today.getFullYear()}${String(
-            this.state.today.getMonth()
-          ).padStart(2, "0")}01`,
-        AA_TO_YMD:
-          AA_TO_YMD ||
-          `${this.state.today.getFullYear()}${String(
-            this.state.today.getMonth()
-          ).padStart(2, "0")}31`,
+        AA_FROM_YMD: AA_FROM_YMD || `${this.state.today.getFullYear()}0301`,
+        AA_TO_YMD: AA_TO_YMD || `${this.state.today.getFullYear() + 1}0220`,
       },
     }).then(
       ({ data }) => {
+        const schedule: any = [];
+
         if (!data.length)
           return (
             <span>
@@ -184,54 +174,39 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
             </span>
           );
 
-        const firstDay = AA_FROM_YMD
-          ? new Date(
-              Number(AA_FROM_YMD.slice(0, 4)),
-              Number(AA_FROM_YMD.slice(4, 6)),
-              Number(AA_FROM_YMD.slice(6, 8))
-            )
-          : new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastDay = AA_TO_YMD
-          ? new Date(
-              Number(AA_TO_YMD.slice(0, 4)),
-              Number(AA_TO_YMD.slice(4, 6)),
-              Number(AA_TO_YMD.slice(6, 8))
-            )
-          : new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const scheduleTable = document.getElementById(
-          "scheduleTable"
-        ) as HTMLTableElement;
+        for (let i = 0; i < data.length; i++) {
+          const startDate = new Date();
+          const endDate = new Date();
+          const newYear = Number(data[i].AA_YMD.slice(0, 4));
+          const newMonth = Number(
+            data[i].AA_YMD.slice(4, 6).split("0").join("")
+          );
+          const newDate = Number(
+            data[i].AA_YMD.slice(6, 8).split("0").join("")
+          );
 
-        while (scheduleTable.rows.length > 2) {
-          scheduleTable.deleteRow(scheduleTable.rows.length - 1);
+          startDate.setFullYear(newYear);
+          startDate.setMonth(newMonth - 1);
+          startDate.setDate(newDate);
+          endDate.setFullYear(newYear);
+          endDate.setMonth(newMonth - 1);
+          endDate.setDate(newDate + 1);
+          schedule.push({
+            id: i + 4,
+            title: "테스트",
+            description: "",
+            startTimezone: null,
+            start: startDate,
+            end: endDate,
+            endTimezone: null,
+            recurrenceRule: null,
+            recurrenceId: null,
+            recurrenceExceptions: null,
+            isAllDay: false,
+          });
         }
 
-        let row = scheduleTable.insertRow();
-        let cell,
-          cnt = 0;
-
-        for (let i = 0; i < firstDay.getDay(); i++) {
-          cell = row.insertCell();
-          cnt = cnt + 1;
-        }
-        for (let i = 1; i <= lastDay.getDate(); i++) {
-          cell = row.insertCell();
-          cell.innerHTML = String(i);
-          cnt = cnt + 1;
-          if (cnt % 7 === 1) {
-            cell.innerHTML = "<font color=red>" + i;
-          }
-          if (cnt % 7 === 0) {
-            cell.innerHTML = "<font color=blue>" + i;
-            row = scheduleTable.insertRow();
-          }
-          if (
-            now.getFullYear() === this.state.today.getFullYear() &&
-            now.getMonth() === this.state.today.getMonth() &&
-            i == now.getDate()
-          )
-            cell.classList.add("today");
-        }
+        this.setState({ schedule });
       },
       (e) => {
         console.error(e);
@@ -268,7 +243,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
                 });
                 this.hide(document.getElementById("selectSchoolDialogBox"));
                 this.loadComments();
-                this.getSchedule();
+                this.loadSchedule();
               }
             }}
           >
@@ -376,33 +351,14 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
             display: this.state.schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
           }}
         >
-          <h3 id="scheduleTitle">
-            {this.state.today.getMonth() + 1}월 학사일정
-          </h3>
-          <table id="scheduleTable">
-            <tr>
-              <td>
-                <label onClick={() => {}}>{"<"}</label>
-              </td>
-              <td id="yearMonth" align="center" colSpan={5}></td>
-              <td>
-                <label onClick={() => {}}>{">"}</label>
-              </td>
-            </tr>
-            <tr>
-              <td align="center">
-                <span color="red">일</span>
-              </td>
-              <td align="center">월</td>
-              <td align="center">화</td>
-              <td align="center">수</td>
-              <td align="center">목</td>
-              <td align="center">금</td>
-              <td align="center">
-                <span color="blue">토</span>
-              </td>
-            </tr>
-          </table>
+          <h3 id="scheduleTitle">학사일정</h3>
+          <Scheduler data={this.state.schedule} defaultDate={this.state.today}>
+            <MonthView
+              title="Month"
+              selectedDateFormat="{0:M}"
+              selectedShortDateFormat="{0:M}"
+            />
+          </Scheduler>
         </div>
         <p />
         <div

@@ -122,7 +122,7 @@ export default function (App: Express.Application): void {
           KEY: SETTINGS["neis"].key,
           Type: "json",
           pIndex: 1,
-          pSize: 27,
+          pSize: 365,
           ATPT_OFCDC_SC_CODE: req.query.ATPT_OFCDC_SC_CODE,
           SD_SCHUL_CODE: req.query.SD_SCHUL_CODE,
           AA_FROM_YMD: req.query.AA_FROM_YMD,
