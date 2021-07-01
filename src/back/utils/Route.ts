@@ -8,14 +8,11 @@ import { PageBuilder } from "./ReactNest";
 import DB from "./Database";
 import { Logger } from "./Logger";
 
-const registerSchoolToDB = async (schoolData: any, req: any, res: any) => {
-  if (
-    (
-      await DB.Manager.query(
-        `SELECT * FROM school WHERE SD_SCHUL_CODE = '${schoolData.SD_SCHUL_CODE}'`
-      )
-    ).length === 0
-  ) {
+const registerSchoolToDB = async (schoolData: any) => {
+  const registeredData = await DB.Manager.query(
+    `SELECT * FROM school WHERE SD_SCHUL_CODE = '${schoolData.SD_SCHUL_CODE}'`
+  );
+  if (registeredData.length === 0) {
     DB.Manager.query(
       `INSERT INTO school VALUES(
       '${schoolData.ATPT_OFCDC_SC_CODE}',
@@ -44,7 +41,7 @@ const registerSchoolToDB = async (schoolData: any, req: any, res: any) => {
       '${schoolData.LOAD_DTM}'
     );`
     );
-  } else {
+  } else if (registeredData.LOAD_DTM !== schoolData.LOAD_DTM) {
     DB.Manager.query(
       `UPDATE school SET
     ATPT_OFCDC_SC_CODE = '${schoolData.ATPT_OFCDC_SC_CODE}',
@@ -95,11 +92,11 @@ export default function (App: Express.Application): void {
     ).data.schoolInfo[1].row;
     if (schoolData.length >= 2) {
       for (let i in schoolData) {
-        registerSchoolToDB(schoolData[i], req, res);
+        registerSchoolToDB(schoolData[i]);
       }
       return res.send(schoolData);
     } else {
-      registerSchoolToDB(schoolData[0], req, res);
+      registerSchoolToDB(schoolData[0]);
       return res.send([schoolData[0]]);
     }
   });
