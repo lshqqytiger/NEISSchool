@@ -1,10 +1,25 @@
 import React from "react";
+import _ReactHTMLParser, { HTMLReactParserOptions } from "html-react-parser";
 import Axios from "axios";
 import { Scheduler, MonthView } from "@progress/kendo-react-scheduler";
 
 import JJorm from "../JJorm";
 import Bind from "../ReactBootstrap";
 import L from "../@global/Language";
+
+interface Schedule {
+  id: number;
+  title: string;
+  description: string;
+  startTimezone: string | null;
+  start: Date;
+  end: Date;
+  endTimezone: string | null;
+  recurrenceRule: any;
+  recurrenceId: number | null;
+  recurrenceExceptions: any;
+  isAllDay: boolean;
+}
 
 type SchoolData = {
   SD_SCHUL_CODE: string;
@@ -33,8 +48,24 @@ type State = {
     >
   >;
   today: any;
-  schedule: any;
-  meal: Array<any>;
+  schedule: Array<Schedule>;
+  meal: any;
+};
+
+const parseDate = (date: string | Date) => {
+  if (typeof date == "string") return date;
+
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}${String(date.getDate()).padStart(2, "0")}`;
+};
+const ReactHTMLParser = (
+  html: string | null | undefined,
+  options?: HTMLReactParserOptions | undefined
+) => {
+  if (html) return _ReactHTMLParser(html);
+  else return "";
 };
 
 export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
@@ -61,7 +92,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
       comment: [<span>학교 평가를 작성하려면 먼저 학교를 검색해주세요.</span>],
       today: new Date(),
       schedule: [],
-      meal: [<span>급식 정보를 확인하려면 먼저 학교를 검색해주세요.</span>],
+      meal: {},
     };
   }
 
@@ -86,6 +117,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
               this.hide(e.currentTarget.parentElement);
               this.loadComments(this.state.duplicatedName[i]);
               this.loadSchedule(this.state.duplicatedName[i]);
+              this.loadMeal(this.state.duplicatedName[i]);
             }}
           >
             {this.state.duplicatedName[i].SCHUL_NM} (
@@ -114,7 +146,13 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
       ({ data }) => {
         if (!data.length) {
           this.setState({
-            comment: [<span>DB에 존재하지 않는 학교입니다.</span>],
+            comment: [
+              <span>
+                {this.state.schoolData.SD_SCHUL_CODE
+                  ? "아직 이 학교에 대해 평가가 작성되지 않았습니다."
+                  : "DB에 존재하지 않는 학교입니다."}
+              </span>,
+            ],
           });
           return;
         }
@@ -142,13 +180,6 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
     AA_FROM_YMD?: string,
     AA_TO_YMD?: string
   ) => {
-    const arr: Array<
-      React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLSpanElement>,
-        HTMLSpanElement
-      >
-    > = [];
-
     this.setState({
       schedule: [],
     });
@@ -168,11 +199,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         const schedule: any = [];
 
         if (!data.length)
-          return (
-            <span>
-              API에서 가져올 수 없는 학교 또는 존재하지 않는 학교입니다.
-            </span>
-          );
+          return console.error("학사일정을 불러오지 못했습니다.");
 
         for (let i = 0; i < data.length; i++) {
           const startDate = new Date();
@@ -193,8 +220,8 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
           endDate.setDate(newDate + 1);
           schedule.push({
             id: i + 4,
-            title: "테스트",
-            description: "",
+            title: data[i].EVENT_NM,
+            description: `${data[i].EVENT_NM}\n휴업 여부: ${data[i].SBTR_DD_SC_NM}`,
             startTimezone: null,
             start: startDate,
             end: endDate,
@@ -207,6 +234,31 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         }
 
         this.setState({ schedule });
+      },
+      (e) => {
+        console.error(e);
+      }
+    );
+  };
+
+  loadMeal = async (custom?: SchoolData | null, MLSV_YMD?: string | Date) => {
+    this.setState({
+      meal: {},
+    });
+    await Axios.get("/school/meal", {
+      params: {
+        ATPT_OFCDC_SC_CODE: custom
+          ? custom.ATPT_OFCDC_SC_CODE
+          : this.state.schoolData.ATPT_OFCDC_SC_CODE,
+        SD_SCHUL_CODE: custom
+          ? custom.SD_SCHUL_CODE
+          : this.state.schoolData.SD_SCHUL_CODE,
+        MLSV_YMD: parseDate(MLSV_YMD || new Date()),
+      },
+    }).then(
+      ({ data }) => {
+        console.log(ReactHTMLParser(data.DDISH_NM));
+        this.setState({ meal: data });
       },
       (e) => {
         console.error(e);
@@ -244,6 +296,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
                 this.hide(document.getElementById("selectSchoolDialogBox"));
                 this.loadComments();
                 this.loadSchedule();
+                this.loadMeal();
               }
             }}
           >
@@ -351,7 +404,7 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
             display: this.state.schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
           }}
         >
-          <h3 id="scheduleTitle">학사일정</h3>
+          <h3>학사일정</h3>
           <Scheduler data={this.state.schedule} defaultDate={this.state.today}>
             <MonthView
               title="Month"
@@ -368,6 +421,70 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
           }}
         >
           <h3>급식</h3>
+          <span id="mealArticle">
+            {ReactHTMLParser(this.state.meal.DDISH_NM)}
+            <p />
+            열량: {this.state.meal.CAL_INFO}
+            <p />
+            <a
+              onClick={(e) => {
+                if (
+                  document.getElementById("nutrientSpan")?.style.display ===
+                  "block"
+                )
+                  this.hide(document.getElementById("nutrientSpan"));
+                else this.show(document.getElementById("nutrientSpan"));
+              }}
+            >
+              영양 성분{" "}
+              {document.getElementById("nutrientSpan")?.style.display ===
+              "block"
+                ? "닫기"
+                : "보기"}
+              <span id="nutrientSpan" style={{ display: "none" }}>
+                {ReactHTMLParser(this.state.meal.NTR_INFO)}
+              </span>
+            </a>
+            <p />
+            <a
+              onClick={() => {
+                if (
+                  document.getElementById("originCountrySpan")?.style
+                    .display === "block"
+                )
+                  this.hide(document.getElementById("originCountrySpan"));
+                else this.show(document.getElementById("originCountrySpan"));
+              }}
+            >
+              원산지 정보{" "}
+              {document.getElementById("originCountrySpan")?.style.display ===
+              "block"
+                ? "닫기"
+                : "보기"}
+              <span id="originCountrySpan" style={{ display: "none" }}>
+                {ReactHTMLParser(this.state.meal.ORPLC_INFO)}
+              </span>
+            </a>
+          </span>
+          <br />
+          <button
+            className="tailButton"
+            onClick={() => {
+              this.state.today.setDate(this.state.today.getDate() - 1);
+              this.loadMeal(null, this.state.today);
+            }}
+          >
+            이전
+          </button>
+          <button
+            className="tailButton"
+            onClick={() => {
+              this.state.today.setDate(this.state.today.getDate() + 1);
+              this.loadMeal(null, this.state.today);
+            }}
+          >
+            다음
+          </button>
         </div>
       </article>
     );

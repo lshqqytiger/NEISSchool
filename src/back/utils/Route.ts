@@ -130,6 +130,30 @@ export default function (App: Express.Application): void {
 
     return res.send(schedule.SchoolSchedule[1].row);
   });
+  App.get("/school/meal", async (req, res) => {
+    if (!req.query.ATPT_OFCDC_SC_CODE) return res.sendStatus(400);
+    if (!req.query.SD_SCHUL_CODE) return res.sendStatus(400);
+
+    try {
+      const schedule = (
+        await Axios.get(`${SETTINGS["neis"].host}/mealServiceDietInfo`, {
+          params: {
+            KEY: SETTINGS["neis"].key,
+            Type: "json",
+            ATPT_OFCDC_SC_CODE: req.query.ATPT_OFCDC_SC_CODE,
+            SD_SCHUL_CODE: req.query.SD_SCHUL_CODE,
+            MLSV_YMD: req.query.MLSV_YMD,
+          },
+        })
+      ).data.mealServiceDietInfo[1].row[0];
+      return res.send(schedule);
+    } catch (e) {
+      return res.send({
+        DDISH_NM:
+          "급식 정보를 가져오지 못했습니다. 급식이 없는 날이거나 나이스 API 서버가 응답하지 않습니다.",
+      });
+    }
+  });
 
   App.post("/school/comment", async (req, res) => {
     if (!req.body.writer) return res.sendStatus(400);

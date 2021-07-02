@@ -5,6 +5,21 @@
   border: solid;
 }
 
+#mealBox {
+  width: 400px;
+  height: 600px;
+}
+
+#mealArticle {
+  width: 400px;
+  height: 300px;
+}
+
+.tailButton {
+  position: relative;
+  top: 10px;
+}
+
 .today {
   background-color: #faf58c;
 }
