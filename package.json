@@ -17,6 +17,9 @@
     "react-dom": "react-dom/umd"
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.6.7",
+    "@emotion/react": "11",
+    "@emotion/styled": "11",
     "@fortawesome/fontawesome-free": "^5.8.0",
     "@progress/kendo-date-math": "^1.5.2",
     "@progress/kendo-drawing": "^1.10.1",
@@ -37,6 +40,7 @@
     "axios": "^0.21.1",
     "cookie-parser": "^1.4.3",
     "express": "^4.16.2",
+    "framer-motion": "4",
     "html-react-parser": "^1.2.7",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
