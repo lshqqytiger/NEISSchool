@@ -1,0 +1,1 @@
+window.__CLIENT_SETTINGS={"language-support":{"ko-KR":"한국어"}}

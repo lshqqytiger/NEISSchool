@@ -4,6 +4,10 @@ node_modules/
 
 dist/*
 !dist/media/
+!dist/pages/
+!dist/strings/
+!dist/constants.js
+!dist/favicon.ico
 tools/publish-cache.json
 
 yarn-error.log
