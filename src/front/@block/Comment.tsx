@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Axios from "axios";
 import {
   Text,
@@ -13,8 +13,11 @@ const Comment = ({ schoolData }: any) => {
   const [commentList, setCommentList] = useState([
     <Text>학교 평가를 불러오고 있습니다..</Text>,
   ]);
-  const loadComments = useCallback(() => {
-    const load = async () => {
+  const [writerName, setWriterName] = useState("");
+  const [writerPassword, setWriterPassword] = useState("");
+  const [comment, setComment] = useState("");
+  const fetchComments = useCallback(() => {
+    const fetch = async () => {
       const arr: Array<
         React.DetailedHTMLProps<
           React.HTMLAttributes<HTMLSpanElement>,
@@ -53,8 +56,12 @@ const Comment = ({ schoolData }: any) => {
         }
       );
     };
-    load();
-  }, []);
+    fetch();
+  }, [schoolData]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   return (
     <Stack
@@ -67,31 +74,40 @@ const Comment = ({ schoolData }: any) => {
     >
       <Heading fontSize="3xl">학교 평가</Heading>
       {commentList}
-      <Input id="writerNameInput" placeholder="작성자" />
-      <Input id="writerPasswordInput" placeholder="비밀번호" />
-      <Textarea id="commentInput" placeholder="내용" />
+      <Input
+        placeholder="작성자"
+        onChange={(e) => {
+          setWriterName(e.target.value);
+        }}
+        value={writerName}
+      />
+      <Input
+        placeholder="비밀번호"
+        onChange={(e) => {
+          setWriterPassword(e.target.value);
+        }}
+        value={writerPassword}
+      />
+      <Textarea
+        placeholder="내용"
+        onChange={(e) => {
+          setComment(e.target.value);
+        }}
+        value={comment}
+      />
       <Button
         onClick={async () => {
-          const writer = (
-            document.getElementById("writerNameInput") as HTMLInputElement
-          ).value;
-          const password = (
-            document.getElementById("writerPasswordInput") as HTMLInputElement
-          ).value;
-          const content = (
-            document.getElementById("commentInput") as HTMLTextAreaElement
-          ).value;
-          if (!writer) return alert("작성자 닉네임을 입력해주세요.");
-          if (!password)
+          if (!writerName) return alert("작성자 닉네임을 입력해주세요.");
+          if (!writerPassword)
             return alert("댓글 관리를 위한 비밀번호를 입력해주세요.");
-          if (!content) return alert("내용을 입력해주세요.");
+          if (!comment) return alert("내용을 입력해주세요.");
           await Axios.post("/school/comment", {
-            writer: writer,
+            writer: writerName,
             target: schoolData.SD_SCHUL_CODE,
-            content: content,
-            password: password,
+            content: comment,
+            password: writerPassword,
           });
-          loadComments();
+          fetchComments();
         }}
       >
         작성

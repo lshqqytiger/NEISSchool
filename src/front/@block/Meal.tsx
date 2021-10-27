@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Axios from "axios";
 import { Stack, Heading, Box, Button } from "@chakra-ui/react";
 import _ReactHTMLParser, { HTMLReactParserOptions } from "html-react-parser";
@@ -31,8 +31,8 @@ const Meal = ({ schoolData }: any) => {
   });
   const [date, setDate] = useState(new Date());
 
-  const loadMeal = useCallback(() => {
-    const load = async () => {
+  const fetchMeal = useCallback(() => {
+    const fetch = async () => {
       setMeal({ DDISH_NM: "", NTR_INFO: "", ORPLC_INFO: "", CAL_INFO: "" });
       await Axios.get("/school/meal", {
         params: {
@@ -49,8 +49,12 @@ const Meal = ({ schoolData }: any) => {
         }
       );
     };
-    load();
-  }, [date]);
+    fetch();
+  }, [date, schoolData]);
+
+  useEffect(() => {
+    fetchMeal();
+  }, [fetchMeal]);
 
   return (
     <Stack
@@ -64,7 +68,8 @@ const Meal = ({ schoolData }: any) => {
       <Heading fontSize="3xl">급식</Heading>
       <Box id="mealArticle">
         {ReactHTMLParser(meal.DDISH_NM)}
-        열량: {meal.CAL_INFO}
+        <br />
+        {meal.CAL_INFO && "열량: " + meal.CAL_INFO}
         <br />
         <AlertDialog title="영양 성분" text="영양 성분">
           {ReactHTMLParser(meal.NTR_INFO)}
@@ -77,8 +82,10 @@ const Meal = ({ schoolData }: any) => {
         <Button
           className="tailButton"
           onClick={() => {
-            date.setDate(date.getDate() - 1);
-            loadMeal();
+            let copied = new Date(date);
+            copied.setDate(date.getDate() - 1);
+            setDate(copied);
+            fetchMeal();
           }}
         >
           이전
@@ -86,8 +93,10 @@ const Meal = ({ schoolData }: any) => {
         <Button
           className="tailButton"
           onClick={() => {
-            date.setDate(date.getDate() + 1);
-            loadMeal();
+            let copied = new Date(date);
+            copied.setDate(date.getDate() + 1);
+            setDate(copied);
+            fetchMeal();
           }}
         >
           다음

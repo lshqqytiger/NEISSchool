@@ -155,8 +155,8 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
           <>
             <About schoolData={this.state.schoolData} />
             <Comment schoolData={this.state.schoolData} />
-            <Schedule schoolData={this.state.schoolData} />
             <Meal schoolData={this.state.schoolData} />
+            <Schedule schoolData={this.state.schoolData} />
           </>
         )}
       </article>

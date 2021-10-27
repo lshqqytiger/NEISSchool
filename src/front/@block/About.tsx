@@ -1,23 +1,6 @@
 import React from "react";
 import { Text, Stack } from "@chakra-ui/react";
 
-type SchoolData = {
-  SD_SCHUL_CODE: string;
-  ATPT_OFCDC_SC_NM: string;
-  ATPT_OFCDC_SC_CODE: string;
-  SCHUL_NM: string;
-  ENG_SCHUL_NM: string;
-  SCHUL_KND_SC_NM: string;
-  FOND_SC_NM: string;
-  ORG_RDNZC: string;
-  ORG_RDNMA: string;
-  ORG_RDNDA: string;
-  ORG_TELNO: string;
-  COEDU_SC_NM: string;
-  HMPG_ADRES: string;
-  FOND_YMD: number;
-};
-
 const About = ({ schoolData }: any) => {
   return (
     <Stack
