@@ -1,0 +1,29 @@
+@import "../@global/global.scss";
+@import "~@progress/kendo-theme-default/dist/all.scss";
+
+#selectSchoolDialogBox {
+  border: solid;
+}
+
+#mealBox {
+  width: 300px;
+  height: 300px;
+}
+
+#mealArticle {
+  width: 300px;
+  height: 300px;
+}
+
+#commentBox {
+  width: 400px;
+}
+
+.tailButton {
+  position: relative;
+  top: 10px;
+}
+
+.today {
+  background-color: #faf58c;
+}

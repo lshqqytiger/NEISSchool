@@ -1,7 +1,8 @@
 {
   "$items": {
-    "example": [ "GET", "/example" ]
+    "example": ["GET", "/example"]
   },
   "$global": [],
-  "Index": []
+  "Index": [],
+  "Result": []
 }
