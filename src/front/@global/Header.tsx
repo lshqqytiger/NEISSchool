@@ -14,20 +14,6 @@ export default class Header extends JJorm {
           <Box>
             <ChangeThemeButton />
           </Box>
-
-          <Box className="navigation">
-            <ul>
-              <li>
-                <Text
-                  onClick={() => {
-                    location.href = "/";
-                  }}
-                >
-                  홈
-                </Text>
-              </li>
-            </ul>
-          </Box>
         </Box>
       </header>
     );

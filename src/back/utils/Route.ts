@@ -76,7 +76,6 @@ const registerSchoolToDB = async (schoolData: any) => {
 
 export default function (App: Express.Application): void {
   App.get("/", PageBuilder("Index"));
-  App.get("/search/:name", (req) => PageBuilder("Result", req.params.name));
   App.get("/school/info", async (req, res) => {
     if (!req.query.schoolName) return res.sendStatus(400);
 

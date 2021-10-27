@@ -3,6 +3,5 @@
     "example": ["GET", "/example"]
   },
   "$global": [],
-  "Index": [],
-  "Result": []
+  "Index": []
 }

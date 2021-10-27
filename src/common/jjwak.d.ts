@@ -4,7 +4,6 @@ declare namespace JJWAK {
     type DataTable = {
       //@jjwak-auto PAGE {
       Index: never;
-      Result: string;
       //@jjwak-auto PAGE }
     };
     type Metadata = {
