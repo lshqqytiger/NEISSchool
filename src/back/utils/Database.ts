@@ -5,7 +5,8 @@ import { CLOTHES } from "./Clothes";
 import { Iterator } from "./Utility";
 
 //@jjwak-auto DB_IMPORT {
-import Example from "back/models/Example";
+import School from "back/models/School";
+import Comment from "back/models/Comment";
 //@jjwak-auto DB_IMPORT }
 import { Logger } from "./Logger";
 
@@ -18,7 +19,8 @@ export default class DB {
   public static async initialize(): Promise<void> {
     const entities: Function[] = [
       //@jjwak-auto DB_ENTITY {
-      Example,
+      School,
+      Comment,
       //@jjwak-auto DB_ENTITY }
     ];
 

@@ -7,6 +7,7 @@ import {
   Input,
   Textarea,
   Button,
+  Center,
 } from "@chakra-ui/react";
 
 const Comment = ({ schoolData }: any) => {
@@ -29,23 +30,22 @@ const Comment = ({ schoolData }: any) => {
       Axios.get(`/school/comment?id=${schoolData.SD_SCHUL_CODE}`).then(
         ({ data }) => {
           if (!data.length) {
-            setCommentList([
+            return setCommentList([
               <Text>
                 {schoolData.SD_SCHUL_CODE
                   ? "아직 이 학교에 대해 평가가 작성되지 않았습니다."
                   : "DB에 존재하지 않는 학교입니다."}
               </Text>,
             ] as any);
-            return;
           }
 
           for (let i in data) {
             if (data[i].status.deleted) continue;
             if (data[i].target !== schoolData.SD_SCHUL_CODE) continue;
-            arr.push(<br />);
             arr.push(
-              <Text id={`comment${data[i].id}`}>
-                [{data[i].createdAt}] {data[i].writer}: {data[i].content}
+              <Text>
+                [{new Date(data[i].createdAt).toLocaleString()}]{" "}
+                {data[i].writer}: {data[i].content}
               </Text>
             );
           }
@@ -72,8 +72,10 @@ const Comment = ({ schoolData }: any) => {
         display: schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
       }}
     >
-      <Heading fontSize="3xl">학교 평가</Heading>
-      {commentList}
+      <Center>
+        <Heading fontSize="3xl">평가</Heading>
+      </Center>
+      <Stack spacing="0.5">{commentList}</Stack>
       <Input
         placeholder="작성자"
         onChange={(e) => {

@@ -17,7 +17,7 @@ import L from "../@global/Language";
 
 import { About, Comment, Schedule, Meal } from "../SubMenu";
 
-interface Schedule {
+interface ScheduleElement {
   id: number;
   title: string;
   description: string;
@@ -52,11 +52,15 @@ type Properties = {};
 type State = {
   schoolData: SchoolData;
   duplicatedName: Array<SchoolData>;
-  schedule: Array<Schedule>;
+  schedule: Array<ScheduleElement>;
   meal: any;
   nutrientDisplay: string;
   originCountryDisplay: string;
   schoolNameInput: string;
+  isAboutVisible: boolean;
+  isCommentVisible: boolean;
+  isScheduleVisible: boolean;
+  isMealVisible: boolean;
 };
 
 export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
@@ -83,6 +87,10 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
     nutrientDisplay: "none",
     originCountryDisplay: "none",
     schoolNameInput: "",
+    isAboutVisible: false,
+    isCommentVisible: false,
+    isScheduleVisible: false,
+    isMealVisible: false,
   };
 
   constructor(props: JJWAK.Page.Props<"Index">) {
@@ -96,7 +104,6 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
         <>
           <br />
           <Button
-            id={`duplicatedName${i}`}
             onClick={(e) => {
               this.setState({ schoolData: this.state.duplicatedName[i] });
             }}
@@ -113,11 +120,10 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
   render(): React.ReactNode {
     return (
       <article>
-        <Center display={this.state.schoolData.SCHUL_NM ? "none" : "block"}>
+        <Center>
           <Stack spacing="2" alignContent="center">
             <Text>학교명을 입력하세요.</Text>
             <Input
-              id="schoolNameInput"
               type="text"
               w="200px"
               onChange={(e) => {
@@ -151,13 +157,66 @@ export default class Index extends JJorm<JJWAK.Page.Props<"Index">, State> {
               : ""}
           </Stack>
         </Center>
+        <br />
         {this.state.schoolData.SCHUL_NM && (
-          <>
-            <About schoolData={this.state.schoolData} />
-            <Comment schoolData={this.state.schoolData} />
-            <Meal schoolData={this.state.schoolData} />
-            <Schedule schoolData={this.state.schoolData} />
-          </>
+          <Center>
+            <Box
+              color={this.state.isAboutVisible ? "blue.500" : "gray.500"}
+              onClick={() => {
+                this.setState({ isAboutVisible: !this.state.isAboutVisible });
+              }}
+            >
+              정보
+            </Box>
+            &nbsp;
+            <Box
+              color={this.state.isCommentVisible ? "blue.500" : "gray.500"}
+              onClick={() => {
+                this.setState({
+                  isCommentVisible: !this.state.isCommentVisible,
+                });
+              }}
+            >
+              평가
+            </Box>
+            &nbsp;
+            <Box
+              color={this.state.isScheduleVisible ? "blue.500" : "gray.500"}
+              onClick={() => {
+                this.setState({
+                  isScheduleVisible: !this.state.isScheduleVisible,
+                });
+              }}
+            >
+              학사일정
+            </Box>
+            &nbsp;
+            <Box
+              color={this.state.isMealVisible ? "blue.500" : "gray.500"}
+              onClick={() => {
+                this.setState({ isMealVisible: !this.state.isMealVisible });
+              }}
+            >
+              급식
+            </Box>
+          </Center>
+        )}
+        <br />
+        {this.state.schoolData.SCHUL_NM && (
+          <Stack spacing="4" alignItems="center">
+            {this.state.isAboutVisible && (
+              <About schoolData={this.state.schoolData} />
+            )}
+            {this.state.isCommentVisible && (
+              <Comment schoolData={this.state.schoolData} />
+            )}
+            {this.state.isScheduleVisible && (
+              <Schedule schoolData={this.state.schoolData} />
+            )}
+            {this.state.isMealVisible && (
+              <Meal schoolData={this.state.schoolData} />
+            )}
+          </Stack>
         )}
       </article>
     );

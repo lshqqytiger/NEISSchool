@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import Axios from "axios";
-import { Stack, Heading } from "@chakra-ui/react";
+import { Stack, Heading, Center } from "@chakra-ui/react";
 import { Scheduler, MonthView } from "@progress/kendo-react-scheduler";
 
 const Schedule = ({ schoolData }: any) => {
@@ -73,12 +73,13 @@ const Schedule = ({ schoolData }: any) => {
     <Stack
       spacing="2"
       alignContent="center"
-      id="scheduleBox"
       style={{
         display: schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
       }}
     >
-      <Heading fontSize="3xl">학사일정</Heading>
+      <Center>
+        <Heading fontSize="3xl">학사일정</Heading>
+      </Center>
       <Scheduler data={schedule} defaultDate={date}>
         <MonthView
           title="Month"

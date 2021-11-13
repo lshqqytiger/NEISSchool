@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import Axios from "axios";
-import { Stack, Heading, Box, Button } from "@chakra-ui/react";
+import { Stack, Heading, Box, Button, Center } from "@chakra-ui/react";
 import _ReactHTMLParser, { HTMLReactParserOptions } from "html-react-parser";
 
 import { AlertDialog } from "./AlertDialog";
@@ -58,50 +58,57 @@ const Meal = ({ schoolData }: any) => {
 
   return (
     <Stack
-      spacing="2"
+      spacing="1"
       alignContent="center"
       id="mealBox"
       style={{
         display: schoolData.ATPT_OFCDC_SC_NM ? "block" : "none",
       }}
     >
-      <Heading fontSize="3xl">급식</Heading>
-      <Box id="mealArticle">
-        {ReactHTMLParser(meal.DDISH_NM)}
-        <br />
+      <Center>
+        <Heading fontSize="3xl">급식</Heading>
+      </Center>
+      <Center>
+        <Heading fontSize="1xl">
+          {date.getMonth() + 1}월 {date.getDate()}일
+        </Heading>
+      </Center>
+      <Box id="mealArticle">{ReactHTMLParser(meal.DDISH_NM)}</Box>
+      <Stack spacing="0.5" alignItems="center">
         {meal.CAL_INFO && "열량: " + meal.CAL_INFO}
-        <br />
-        <AlertDialog title="영양 성분" text="영양 성분">
-          {ReactHTMLParser(meal.NTR_INFO)}
-        </AlertDialog>
-        &nbsp;
-        <AlertDialog title="원산지 정보" text="원산지 정보">
-          {ReactHTMLParser(meal.ORPLC_INFO)}
-        </AlertDialog>
-        <br />
-        <Button
-          className="tailButton"
-          onClick={() => {
-            let copied = new Date(date);
-            copied.setDate(date.getDate() - 1);
-            setDate(copied);
-            fetchMeal();
-          }}
-        >
-          이전
-        </Button>
-        <Button
-          className="tailButton"
-          onClick={() => {
-            let copied = new Date(date);
-            copied.setDate(date.getDate() + 1);
-            setDate(copied);
-            fetchMeal();
-          }}
-        >
-          다음
-        </Button>
-      </Box>
+        <Box>
+          <AlertDialog title="영양 성분" text="영양 성분">
+            {ReactHTMLParser(meal.NTR_INFO)}
+          </AlertDialog>
+          <AlertDialog title="원산지 정보" text="원산지 정보">
+            {ReactHTMLParser(meal.ORPLC_INFO)}
+          </AlertDialog>
+        </Box>
+        <Box>
+          <Button
+            className="tailButton"
+            onClick={() => {
+              let copied = new Date(date);
+              copied.setDate(date.getDate() - 1);
+              setDate(copied);
+              fetchMeal();
+            }}
+          >
+            이전
+          </Button>
+          <Button
+            className="tailButton"
+            onClick={() => {
+              let copied = new Date(date);
+              copied.setDate(date.getDate() + 1);
+              setDate(copied);
+              fetchMeal();
+            }}
+          >
+            다음
+          </Button>
+        </Box>
+      </Stack>
     </Stack>
   );
 };
