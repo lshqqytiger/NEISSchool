@@ -2,7 +2,6 @@
 
 node_modules/
 
-/dist/libs
 tools/publish-cache.json
 
 yarn-error.log
