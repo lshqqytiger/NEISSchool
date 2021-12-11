@@ -85,7 +85,7 @@ export default function (App: Express.Application): void {
     if (!req.query.SD_SCHUL_CODE) return res.sendStatus(400);
 
     try {
-      const schedule = (
+      const meal = (
         await Axios.get(`${SETTINGS["neis"].host}/mealServiceDietInfo`, {
           params: {
             KEY: SETTINGS["neis"].key,
@@ -96,7 +96,7 @@ export default function (App: Express.Application): void {
           },
         })
       ).data.mealServiceDietInfo[1].row[0];
-      return res.send(schedule);
+      return res.send(meal);
     } catch (e) {
       return res.send({
         DDISH_NM:

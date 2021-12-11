@@ -1188,7 +1188,7 @@ function default_1(App) {
         if (!req.query.SD_SCHUL_CODE)
             return res.sendStatus(400);
         try {
-            const schedule = (yield axios_1.default.get(`${System_1.SETTINGS["neis"].host}/mealServiceDietInfo`, {
+            const meal = (yield axios_1.default.get(`${System_1.SETTINGS["neis"].host}/mealServiceDietInfo`, {
                 params: {
                     KEY: System_1.SETTINGS["neis"].key,
                     Type: "json",
@@ -1197,7 +1197,7 @@ function default_1(App) {
                     MLSV_YMD: req.query.MLSV_YMD,
                 },
             })).data.mealServiceDietInfo[1].row[0];
-            return res.send(schedule);
+            return res.send(meal);
         }
         catch (e) {
             return res.send({
