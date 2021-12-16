@@ -7,31 +7,37 @@ interface CalendarEvent {
 }
 
 type Props = {
-  today: Date;
   events: CalendarEvent[];
 };
 
-function Calendar({ today, events }: Props) {
-  const [date, setDate] = useState(today);
-  const [selectedDateEvents, setSelectedDateEvents] = useState<CalendarEvent[]>(
-    []
-  );
+function Calendar({ events }: Props) {
+  const [date, setDate] = useState(new Date());
+  const [selectedMonthEvents, setSelectedMonthEvents] = useState<
+    CalendarEvent[]
+  >([]);
 
   useEffect(() => {
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    const startDate = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      1 - firstDay
+    const startTime = new Date(date.getFullYear(), date.getMonth() - 1, 21);
+    const endTime = new Date(date.getFullYear(), date.getMonth() + 1, 8);
+    const filteredEvents = events.filter(
+      (event) =>
+        event.date.getTime() >= startTime.getTime() &&
+        event.date.getTime() <= endTime.getTime()
     );
-    const startTime = startDate.getTime();
-    const endTime = new Date(
-      new Date(startDate).setDate(startDate.getDate() + 34)
-    ).getTime();
-    const arr: CalendarEvent[] = [];
-    for (let i of events) {
-      if (i.date.getTime() > startTime && i.date.getTime() < endTime)
-        arr.push(i);
+    const arr = [];
+    for (let i = 0; i < 35; i++) {
+      for (let j of filteredEvents) {
+        if (j.date.getDate() === i + 1) arr[i] = j;
+      }
+      if (!arr[i])
+        arr[i] = {
+          title: "",
+          date: new Date(
+            new Date(arr[i - 1].date).setDate(
+              new Date(arr[i - 1].date).getDate() + 1
+            )
+          ),
+        } as CalendarEvent;
     }
   }, [date]);
 
@@ -40,7 +46,7 @@ function Calendar({ today, events }: Props) {
       <Box>
         <Button
           onClick={() => {
-            setDate(today);
+            setDate(new Date());
           }}
         >
           오늘
@@ -78,8 +84,8 @@ function Calendar({ today, events }: Props) {
           <Box>토</Box>
         </Box>
         <Box>
-          {Array(35).map((v, i) => {
-            return <Box>{}</Box>;
+          {selectedMonthEvents.map((v, i) => {
+            return <Box>{v.date.getDate()}</Box>;
           })}
         </Box>
       </Box>

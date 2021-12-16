@@ -1,10 +1,16 @@
 import React, { useState, useCallback, useEffect } from "react";
 import Axios from "axios";
 import { Stack, Heading, Center } from "@chakra-ui/react";
-import { Scheduler, MonthView } from "@progress/kendo-react-scheduler";
+
+import Calendar from "./Calendar";
+
+interface CalendarEvent {
+  title: string;
+  date: Date;
+}
 
 const Schedule = ({ schoolData }: any) => {
-  const [schedule, setSchedule] = useState([]);
+  const [schedule, setSchedule] = useState<CalendarEvent[]>([]);
   const [date, setDate] = useState(new Date());
 
   const fetchSchedule = useCallback(() => {
@@ -19,42 +25,19 @@ const Schedule = ({ schoolData }: any) => {
         },
       }).then(
         ({ data }) => {
-          const schedule: any = [];
+          const schedule: CalendarEvent[] = [];
 
-          if (!data.length)
-            return console.error("학사일정을 불러오지 못했습니다.");
-
-          for (let i = 0; i < data.length; i++) {
-            const startDate = new Date();
-            const endDate = new Date();
-            const newYear = Number(data[i].AA_YMD.slice(0, 4));
-            const newMonth = Number(
-              data[i].AA_YMD.slice(4, 6).split("0").join("")
-            );
-            const newDate = Number(
-              data[i].AA_YMD.slice(6, 8).split("0").join("")
-            );
-
-            startDate.setFullYear(newYear);
-            startDate.setMonth(newMonth - 1);
-            startDate.setDate(newDate);
-            endDate.setFullYear(newYear);
-            endDate.setMonth(newMonth - 1);
-            endDate.setDate(newDate + 1);
+          for (let i in data) {
             schedule.push({
-              id: i + 4,
               title: data[i].EVENT_NM,
-              description: `${data[i].EVENT_NM}\n휴업 여부: ${data[i].SBTR_DD_SC_NM}`,
-              startTimezone: null,
-              start: startDate,
-              end: endDate,
-              endTimezone: null,
-              recurrenceRule: null,
-              recurrenceId: null,
-              recurrenceExceptions: null,
-              isAllDay: false,
+              date: new Date(
+                Number(data[i].AA_YMD.slice(0, 4)),
+                Number(data[i].AA_YMD.slice(4, 6)) - 1,
+                Number(data[i].AA_YMD.slice(6, 8))
+              ),
             });
           }
+
           setSchedule(schedule);
         },
         (e) => {
@@ -80,13 +63,7 @@ const Schedule = ({ schoolData }: any) => {
       <Center>
         <Heading fontSize="3xl">학사일정</Heading>
       </Center>
-      <Scheduler data={schedule} defaultDate={date}>
-        <MonthView
-          title="Month"
-          selectedDateFormat="{0:M}"
-          selectedShortDateFormat="{0:M}"
-        />
-      </Scheduler>
+      <Calendar events={schedule}></Calendar>
     </Stack>
   );
 };
