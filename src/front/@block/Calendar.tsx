@@ -39,6 +39,7 @@ const Calendar = ({ events }: Props) => {
           ),
         } as CalendarEvent;
     }
+    setSelectedMonthEvents(arr);
   }, [date]);
 
   return (
