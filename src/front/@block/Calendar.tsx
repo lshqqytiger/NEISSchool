@@ -10,7 +10,7 @@ type Props = {
   events: CalendarEvent[];
 };
 
-function Calendar({ events }: Props) {
+const Calendar = ({ events }: Props) => {
   const [date, setDate] = useState(new Date());
   const [selectedMonthEvents, setSelectedMonthEvents] = useState<
     CalendarEvent[]
@@ -75,13 +75,13 @@ function Calendar({ events }: Props) {
       </Box>
       <Box>
         <Box>
-          <Box>일</Box>
-          <Box>월</Box>
-          <Box>화</Box>
-          <Box>수</Box>
-          <Box>목</Box>
-          <Box>금</Box>
-          <Box>토</Box>
+          <Box className="calendar_week">일</Box>
+          <Box className="calendar_week">월</Box>
+          <Box className="calendar_week">화</Box>
+          <Box className="calendar_week">수</Box>
+          <Box className="calendar_week">목</Box>
+          <Box className="calendar_week">금</Box>
+          <Box className="calendar_week">토</Box>
         </Box>
         <Box>
           {selectedMonthEvents.map((v, i) => {
@@ -91,6 +91,6 @@ function Calendar({ events }: Props) {
       </Box>
     </Box>
   );
-}
+};
 
 export default Calendar;

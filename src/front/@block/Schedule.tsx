@@ -12,8 +12,10 @@ interface CalendarEvent {
 const Schedule = ({ schoolData }: any) => {
   const [schedule, setSchedule] = useState<CalendarEvent[]>([]);
   const [date, setDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchSchedule = useCallback(() => {
+    setIsLoading(true);
     const fetch = () => {
       setSchedule([]);
       Axios.get("/school/schedule", {
@@ -37,8 +39,8 @@ const Schedule = ({ schoolData }: any) => {
               ),
             });
           }
-
           setSchedule(schedule);
+          setIsLoading(false);
         },
         (e) => {
           console.error(e);
@@ -63,7 +65,7 @@ const Schedule = ({ schoolData }: any) => {
       <Center>
         <Heading fontSize="3xl">학사일정</Heading>
       </Center>
-      <Calendar events={schedule}></Calendar>
+      {isLoading ? "로딩 중입니다." : <Calendar events={schedule} />}
     </Stack>
   );
 };
