@@ -17,28 +17,35 @@ const Calendar = ({ events }: Props) => {
   >([]);
 
   useEffect(() => {
-    const startTime = new Date(date.getFullYear(), date.getMonth() - 1, 21);
-    const endTime = new Date(date.getFullYear(), date.getMonth() + 1, 8);
+    const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    startDate.setDate(1 - startDate.getDay());
+    const endDate = new Date(
+      new Date(startDate).setDate(startDate.getDate() + 34)
+    );
     const filteredEvents = events.filter(
       (event) =>
-        event.date.getTime() >= startTime.getTime() &&
-        event.date.getTime() <= endTime.getTime()
+        event.date.getTime() >= startDate.getTime() &&
+        event.date.getTime() <= endDate.getTime()
     );
     const arr = [];
-    for (let i = 0; i < 35; i++) {
+    console.log(startDate, endDate);
+    for (
+      let i = new Date(startDate);
+      i.getTime() != endDate.getTime() + 86400000;
+      i = new Date(i.setDate(i.getDate() + 1))
+    ) {
+      const gap = (i.getTime() - startDate.getTime()) / 86400000;
+      console.log(gap);
       for (let j of filteredEvents) {
-        if (j.date.getDate() === i + 1) arr[i] = j;
+        if (j.date.getTime() === i.getTime()) arr[gap] = j;
       }
-      if (!arr[i])
-        arr[i] = {
+      if (!arr[gap])
+        arr[gap] = {
           title: "",
-          date: new Date(
-            new Date(arr[i - 1].date).setDate(
-              new Date(arr[i - 1].date).getDate() + 1
-            )
-          ),
+          date: i,
         } as CalendarEvent;
     }
+    console.log(arr);
     setSelectedMonthEvents(arr);
   }, [date]);
 
@@ -86,7 +93,13 @@ const Calendar = ({ events }: Props) => {
         </Box>
         <Box>
           {selectedMonthEvents.map((v, i) => {
-            return <Box>{v.date.getDate()}</Box>;
+            return (
+              <>
+                <Box className={i % 7 == 0 ? "" : "calendar_week"}>
+                  {v.date.getDate()}
+                </Box>
+              </>
+            );
           })}
         </Box>
       </Box>
