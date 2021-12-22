@@ -18,7 +18,7 @@ const Calendar = ({ events }: Props) => {
 
   useEffect(() => {
     const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-    startDate.setDate(1 - startDate.getDay());
+    startDate.setDate(-startDate.getDay());
     const endDate = new Date(
       new Date(startDate).setDate(startDate.getDate() + 34)
     );
@@ -28,22 +28,19 @@ const Calendar = ({ events }: Props) => {
         event.date.getTime() <= endDate.getTime()
     );
     const arr = [];
-    console.log(startDate, endDate);
     for (
       let i = new Date(startDate);
       i.getTime() != endDate.getTime() + 86400000;
       i = new Date(i.setDate(i.getDate() + 1))
     ) {
       const gap = (i.getTime() - startDate.getTime()) / 86400000;
-      console.log(gap);
+      arr[gap] = {
+        title: "",
+        date: i,
+      };
       for (let j of filteredEvents) {
-        if (j.date.getTime() === i.getTime()) arr[gap] = j;
+        if (j.date.getTime() === i.getTime() + 86400000) arr[gap] = j;
       }
-      if (!arr[gap])
-        arr[gap] = {
-          title: "",
-          date: i,
-        } as CalendarEvent;
     }
     console.log(arr);
     setSelectedMonthEvents(arr);
@@ -83,21 +80,24 @@ const Calendar = ({ events }: Props) => {
       </Box>
       <Box>
         <Box>
-          <Box className="calendar_week">일</Box>
-          <Box className="calendar_week">월</Box>
-          <Box className="calendar_week">화</Box>
-          <Box className="calendar_week">수</Box>
-          <Box className="calendar_week">목</Box>
-          <Box className="calendar_week">금</Box>
-          <Box className="calendar_week">토</Box>
+          <Box className="calendar_week_top">일</Box>
+          <Box className="calendar_week_top">월</Box>
+          <Box className="calendar_week_top">화</Box>
+          <Box className="calendar_week_top">수</Box>
+          <Box className="calendar_week_top">목</Box>
+          <Box className="calendar_week_top">금</Box>
+          <Box className="calendar_week_top">토</Box>
         </Box>
         <Box>
           {selectedMonthEvents.map((v, i) => {
             return (
               <>
-                <Box className={i % 7 == 0 ? "" : "calendar_week"}>
+                <Box className="calendar_week">
                   {v.date.getDate()}
+                  <br />
+                  {v.title}
                 </Box>
+                {(i + 1) % 7 == 0 ? <br /> : null}
               </>
             );
           })}

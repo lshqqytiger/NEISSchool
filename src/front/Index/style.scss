@@ -24,6 +24,15 @@
   background-color: #faf58c;
 }
 
+.calendar_week_top {
+  display: inline-block;
+  width: 100px;
+  height: 25px;
+}
+
 .calendar_week {
   display: inline-block;
+  vertical-align: top;
+  width: 100px;
+  height: 100px;
 }
