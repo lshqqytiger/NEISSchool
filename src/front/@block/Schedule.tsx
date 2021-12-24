@@ -10,8 +10,8 @@ interface CalendarEvent {
 }
 
 const Schedule = ({ schoolData }: any) => {
+  const date = new Date();
   const [schedule, setSchedule] = useState<CalendarEvent[]>([]);
-  const [date, setDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSchedule = useCallback(() => {
@@ -48,7 +48,7 @@ const Schedule = ({ schoolData }: any) => {
       );
     };
     fetch();
-  }, [date, schoolData]);
+  }, [schoolData]);
 
   useEffect(() => {
     fetchSchedule();
