@@ -5,16 +5,10 @@
     "age": 604800000,
     "secret": "jjwak"
   },
-  "database": {
-    "username": "root",
-    "database": "neisschool",
-    "host": "localhost",
-    "password": "1234",
-    "port": 3306
-  },
+  "database": {},
   "neis": {
     "host": "https://open.neis.go.kr/hub",
-    "key": "84b026a03cc8424491c0a04083c3c94a"
+    "key": "your key"
   },
   "language-support": {
     "ko-KR": "한국어"
@@ -25,3 +19,4 @@
   },
   "port": 4416
 }
+

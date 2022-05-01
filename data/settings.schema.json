@@ -1,11 +1,7 @@
 {
   "title": "root",
   "type": "object",
-  "required": [
-    "cookie-secret",
-    "language-support",
-    "port"
-  ],
+  "required": ["cookie-secret", "language-support", "port"],
   "properties": {
     "application": {
       "type": "object"
@@ -49,10 +45,7 @@
     },
     "https": {
       "type": "object",
-      "required": [
-        "key",
-        "cert"
-      ],
+      "required": ["key", "cert"],
       "properties": {
         "key": {
           "type": "string",
@@ -80,6 +73,10 @@
     },
     "port": {
       "type": "number"
+    },
+    "neis": {
+      "host": "string",
+      "key": "string"
     }
   }
 }

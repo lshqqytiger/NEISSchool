@@ -7,3 +7,5 @@ dist/*
 tools/publish-cache.json
 
 yarn-error.log
+
+data/settings.dev.json
